@@ -449,6 +449,46 @@ async def stop(ctx):
     else:
       await ctx.send("Only the user who initiatied the vote can end")
 
+      
+@client.command()
+async def proceed(ctx):
+  x = inVote(ctx)
+  if x == None:
+    await ctx.send("This server is currenlty not in voting process\nStart Vote to use this command")
+  else:
+    if x.starter == ctx.author:
+      await ctx.send("Force proceeding...")
+      winner = chooseWinner(x)
+      await x.channel.send("Winner is: " + winner)
+      
+    else:
+      await ctx.send("Only the user who initiatied the vote can force proceed")
+
+
+
+#to get count of how many people finished voting
+@client.command()
+async def currentCount(ctx):
+  x = inVote(ctx)
+  if x == None:
+    await ctx.send("This server is currenlty not in voting process")
+  else:
+    count = len(x.voterList)
+    await ctx.send("Currently there are " + count + " people who haven't voted yet")
+
+
+
+
+#printing the queue
+@client.command()
+async def printQ(ctx):
+  new = inVote(ctx)
+  if new == None:
+    await ctx.send("Initate vote to use this command!")
+  else:
+    for x in new.queueList:
+      await ctx.send(list(x.queue))
+
 
 #error handling
 @client.event
