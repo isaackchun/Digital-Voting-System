@@ -29,31 +29,22 @@ def displayQuotesEmbed(newVote):
   embed = discord.Embed(
     title = '',
     description = '',
-    colour = discord.Colour.green()
+    colour = discord.Colour.red()
   )
+
   #embed.set_footer(text='xd')
   embed.set_thumbnail(url= 'https://s7d2.scene7.com/is/image/TWCNews/Getty_Vote_Ballot_Election')
   embed.set_author(name='🗳️ Digital Voting System')
-  #embed.add_field(name="Number of Candidates: ", value = len(newVote.candidates), inline='False')
+  embed.add_field(name="Number of Candidates: ", value = len(newVote.candidates), inline='False')
 
   counter = 1
   for candidate in newVote.candidates:
-    embed.add_field(name="#" + str(counter) + ": " + str(candidate), value =  "\u200b", inline='True')
+    embed.add_field(name="Candidate #" + str(counter) + ": " + str(candidate), value =  "\u200b", inline='False')
     counter += 1
 
 
   return embed
 
-def initiateEmbed(newVote):
-  embed = discord.Embed(
-    title = 'Enter your candidates seperated by commas!',
-    description = 'Good input: Iron Man, Thor, Captain America.\n\nBad input: Iron Man Thor Captain America\n\n\nTo view all available commands enter $help!',
-    colour = discord.Colour.green()
-  )
-  return embed
-
-
-#the voting process
 def chooseWinner(new):
   #winner = process.Process(new.candidates,new.queueList)
   #winner.run()
@@ -248,7 +239,12 @@ def chooseWinner(new):
   print("winner:" + highestname)
   return highestname
       
+      
 
+  
+
+
+  
 
 @client.event
 async def on_ready():
@@ -267,14 +263,11 @@ def inVote(ctx):
 async def on_message(message):
   if message.author == client.user:
     return
-
-
-
+  
   new = None
   for x in voteSys_list:
     if x.channel == message.channel:
       new = x
-  
 
   if message.guild is None:
     for x in voteSys_list:
@@ -310,12 +303,15 @@ async def on_message(message):
       if len(new.voterList) == 0:
         winner = chooseWinner(new)
         await new.channel.send("Winner is: " + winner)
-        voteSys_list.remove(new)
+
+
+
 
 
       for x in new.queueList:
         print(list(x.queue))
     
+    #print(message.channel in channel_list)
     
     #public vote
     elif message.author in new.voterList and message.channel == new.channel:
@@ -349,8 +345,7 @@ async def on_message(message):
       #proceed if all voters voted
       if len(new.voterList) == 0:
         winner = chooseWinner(new)
-        await new.channel.send("Winner is: " + winner)
-        voteSys_list.remove(new)
+        await new.channel.send("Winner is: " + winner) 
 
 
 
@@ -373,11 +368,7 @@ async def create(ctx):
 
     voteSys_list.append(newVote)
 
-
-
-
-    await ctx.send('🗳️ Digital Voting System')
-    await ctx.send(embed = initiateEmbed(newVote))
+    await ctx.send("Enter candidate names sepereated by commas " + ctx.author.mention)
     #FIXME inform user how to write candidate name
 
     def check(m):
@@ -388,9 +379,6 @@ async def create(ctx):
     candidates = msg.content.split(',')
     for x in range(len(candidates)):
       candidates[x] = candidates[x].strip()
-      if candidates[x].lower() == '$stop':
-        print("returned here")
-        return
   
     newVote.candidates = candidates
 
@@ -418,18 +406,20 @@ async def create(ctx):
         for x in candidates:
           await user.send(x)
 
-        await user.send("Enter your vote from most preferred to least preferred seperated by commas!") 
+        await user.send("Enter your vote from most prefered to least seperated by commas!")
 
       await ctx.send("Enter your votes!")
       print('send embeds')
 
+      
+      await ctx.send(embed=displayQuotesEmbed(newVote))
     
     #public voting
     else:
-      await user.send("Enter your vote from most preferred to least preferred seperated by commas!") 
+      await user.send("Enter your vote from most prefered to least seperated by commas!")
       print('send embeds')
 
-    await ctx.send(embed=displayQuotesEmbed(newVote))
+      await ctx.send(embed=displayQuotesEmbed(newVote))
     
 
   else:
@@ -449,7 +439,7 @@ async def stop(ctx):
     if x.starter == ctx.author:
       await ctx.send("Ending voting process now")
       voteSys_list.remove(x)
-      
+      return
     else:
       await ctx.send("Only the user who initiatied the vote can end")
 
